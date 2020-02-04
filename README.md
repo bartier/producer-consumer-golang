@@ -7,6 +7,8 @@ $ chmod +x producer_consumer_amd64_x86_64
 $ ./producer_consumer_amd64_x86_64
 ```
 
+This is going to generate a file `producer_consumer.log` in your current directory.
+
 ## Log example
 
 In this log there was 6 producers (goroutines) and 1 consumer (another goroutine)
