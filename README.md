@@ -2,7 +2,7 @@
 
 ## Steps to run
 ```
-$ wget https://github.com/bartier/producer-consumer-golang/releases/download/v1.0/producer_consumer_amd64_x86_64 && 
+$ wget https://github.com/bartier/producer-consumer-golang/releases/download/v1.0/producer_consumer_amd64_x86_64
 $ chmod +x producer_consumer_amd64_x86_64
 $ ./producer_consumer_amd64_x86_64
 ```
