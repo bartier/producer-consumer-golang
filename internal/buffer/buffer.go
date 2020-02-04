@@ -3,6 +3,7 @@ package buffer
 import (
 	"errors"
 	"github.com/sirupsen/logrus"
+	"sync"
 )
 
 const (
@@ -11,6 +12,7 @@ const (
 
 type Buffer struct {
 	Resources    [bufferSize]int
+	mux sync.Mutex
 }
 
 func (b *Buffer) GetSize() int {
@@ -18,6 +20,8 @@ func (b *Buffer) GetSize() int {
 }
 
 func (b *Buffer) IsFull() bool {
+	b.mux.Lock()
+	defer b.mux.Unlock()
 
 	logrus.Debug("IsFull() method from Buffer")
 
@@ -34,6 +38,9 @@ func (b *Buffer) IsFull() bool {
 }
 
 func (b *Buffer) IsEmpty() bool {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+
 	logrus.Debug("IsEmpty() method from Buffer")
 
 	for i, v := range b.Resources {
@@ -48,6 +55,9 @@ func (b *Buffer) IsEmpty() bool {
 }
 
 func (b *Buffer) SetResource(n int) {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+
 	logrus.Debug("SetResource() method from Buffer")
 
 	for i, v := range b.Resources {
@@ -62,6 +72,9 @@ func (b *Buffer) SetResource(n int) {
 }
 
 func (b *Buffer) GetResource() (int, error)  {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+
 	logrus.Debug("GetResource() method from Buffer")
 
 	for i := len(b.Resources) - 1; i >= 0; i-- {
