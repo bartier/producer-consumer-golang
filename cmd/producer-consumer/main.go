@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	"sync"
+	"time"
 )
 
 func init() {
@@ -20,7 +21,7 @@ func init() {
 	})
 }
 
-func consumer(bufferChan chan *buffer.Buffer) {
+func consumer(bufferChan chan *buffer.Buffer, id int) {
 	logrus.Info("consumer()")
 
 	for {
@@ -28,8 +29,9 @@ func consumer(bufferChan chan *buffer.Buffer) {
 
 		if !b.IsEmpty() {
 			resource, _ := b.GetResource()
+			time.Sleep(time.Duration(rand.Int63n(10))*time.Millisecond)
 
-			logrus.Infof("main(): Consumer got resource '%d' from buffer", resource)
+			logrus.Infof("main(): Consumer ID %d get resource '%d'. Buffer now: %v", id, resource, b.Resources)
 		} else {
 			logrus.Warn("main(): Consumer can't get resource from empty buffer")
 		}
@@ -37,20 +39,21 @@ func consumer(bufferChan chan *buffer.Buffer) {
 	}
 }
 
-func producer(bufferChan chan *buffer.Buffer) {
+func producer(bufferChan chan *buffer.Buffer, id int, sharedBuffer *buffer.Buffer) {
 	logrus.Info("producer()")
-
-	sharedBuffer := buffer.Buffer{}
 
 	for {
 		randomResource := generateRandomInteger()
+		time.Sleep(time.Duration(rand.Int63n(10))*time.Millisecond)
 
 		if !sharedBuffer.IsFull() {
 			sharedBuffer.SetResource(randomResource)
 
-			logrus.Infof("main(): Producer inserted resource '%d' in buffer", randomResource)
-			bufferChan <- &sharedBuffer
+			logrus.Infof("main(): Producer ID %d put resource '%d'. Buffer now: %v", id, randomResource, sharedBuffer.Resources)
+			bufferChan <- sharedBuffer
 
+		} else {
+			logrus.Infof("main(): Producer ID %d buffer full  '%d'. Buffer now: %v", id, randomResource, sharedBuffer.Resources)
 		}
 	}
 }
@@ -59,7 +62,7 @@ func generateRandomInteger() int {
 	for {
 		randomResource := rand.Intn(1000)
 
-		if randomResource != 0 {
+		if randomResource >= 100  {
 			return randomResource
 		}
 	}
@@ -72,10 +75,17 @@ func main() {
 
 	var bufferChan = make(chan *buffer.Buffer)
 
+	var buffer = new(buffer.Buffer)
+
 	orchestrator.Add(2)
 
-	go producer(bufferChan)
-	go consumer(bufferChan)
+	go producer(bufferChan, 1, buffer)
+	go producer(bufferChan, 2, buffer)
+	go producer(bufferChan, 3, buffer)
+	go producer(bufferChan, 4, buffer)
+	go producer(bufferChan, 5, buffer)
+	go producer(bufferChan, 6, buffer)
+	go consumer(bufferChan, 1)
 
 	orchestrator.Wait()
 }
